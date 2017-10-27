@@ -1,0 +1,14 @@
+Title:
+    CoreFile
+Description:
+    A C++, cross-platform implementation of the
+    <a href="https://msdn.microsoft.com/en-us/library/system.io.file.aspx">C# File</a>
+    class.
+URL:
+    Github, https://github.com/AmazingCow-Libs/CoreFile
+    Docs,  http://amazingcow.com/docs/CoreFile
+Owner:
+    AmazingCow Labs
+Section:
+    Libs
+
