@@ -399,17 +399,17 @@ size_t CoreFile::GetSize(const std::string &filename)
     return GetSize(stream);
 }
 
-size_t CoreFile::GetSize(std::fstream &file_stream)
+size_t CoreFile::GetSize(std::fstream &fileStream)
 {
-    auto curr = file_stream.tellg();
+    auto curr = fileStream.tellg();
 
-    file_stream.seekg(0, std::ios::beg);
-    auto beg = file_stream.tellg();
+    fileStream.seekg(0, std::ios::beg);
+    auto beg = fileStream.tellg();
 
-    file_stream.seekg(0, std::ios::end);
-    auto end = file_stream.tellg();
+    fileStream.seekg(0, std::ios::end);
+    auto end = fileStream.tellg();
 
-    file_stream.seekg(curr, std::ios::beg);
+    fileStream.seekg(curr, std::ios::beg);
 
     auto size = static_cast<size_t>(end - beg);
     return size;
@@ -468,5 +468,3 @@ void CoreFile::WriteAllText(
         std::ostream_iterator<char>(file_stream)
     );
 }
-
-
