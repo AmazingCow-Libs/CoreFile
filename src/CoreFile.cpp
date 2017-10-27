@@ -162,7 +162,6 @@ std::fstream CoreFile::CreateText(const std::string &filename)
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Delete                                                                     //
 ////////////////////////////////////////////////////////////////////////////////
@@ -354,34 +353,36 @@ std::string CoreFile::ReadAllText(const std::string &filename)
 ////////////////////////////////////////////////////////////////////////////////
 void CoreFile::SetCreationTime(const std::string &filename, time_t dateTime)
 {
+    //COWTODO(n2omatt): Implement...
     //http://rosettacode.org/wiki/File_modification_time#C.2B.2B
     //utimensat
 }
 
 void CoreFile::SetCreationTimeUtc(const std::string &filename, time_t dateTime)
 {
-
+    //COWTODO(n2omatt): Implement...
 }
 
 
 void CoreFile::SetLastAccessTime(const std::string &filename, time_t dateTime)
 {
-
+    //COWTODO(n2omatt): Implement...
 }
 
 void CoreFile::SetLastAccessTimeUtc(const std::string &filename, time_t dateTime)
 {
-
+    //COWTODO(n2omatt): Implement...
 }
 
 
 void CoreFile::SetLastWriteTime(const std::string &filename, time_t dateTime)
 {
-
+    //COWTODO(n2omatt): Implement...
 }
+
 void CoreFile::SetLastWriteTimeUtc(const std::string &filename, time_t dateTime)
 {
-
+    //COWTODO(n2omatt): Implement...
 }
 
 
