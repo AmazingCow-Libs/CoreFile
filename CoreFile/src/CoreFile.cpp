@@ -18,17 +18,19 @@
 //                                                                            //
 //---------------------------------------------------------------------------~//
 
-//Header
+// Header
 #include "../include/CoreFile.h"
-//std
+// std
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <iterator>
 #include <sstream>
-//CoreFS
-#include "CoreFS.h"
+// CoreFS
+#include "CoreFS/CoreFS.h"
+// CoreAssert
+#include "CoreAssert/CoreAssert.h"
 
 
 //----------------------------------------------------------------------------//
@@ -83,6 +85,10 @@ std::fstream::openmode filemode_to_openmode(const std::string &filemode)
         return std::ios::in | std::ios::app | std::ios::binary;
     if(filemode == CoreFile::FileMode::Binary::kAppend_Truncate)
         return std::ios::in | std::ios::app | std::ios::trunc | std::ios::binary;
+
+    //--------------------------------------------------------------------------
+    // Invalid filemode.
+    COREASSERT_VERIFY("Invalid filemode (%s)", filemode);
 }
 
 

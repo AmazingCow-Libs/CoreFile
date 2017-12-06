@@ -20,11 +20,11 @@
 
 #pragma once
 
-//std
+// std
 #include <fstream>
 #include <string>
 #include <vector>
-//CoreFile
+// CoreFile
 #include "CoreFile_Utils.h"
 
 
