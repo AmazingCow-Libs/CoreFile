@@ -111,7 +111,10 @@ void AppendAllText(const std::string &filename, const std::string &contents);
 ///   The destination file.
 /// @param overwrite
 ///   If true destination will be overwritten if it already exists.
-void Copy(const std::string &src, const std::string &dst, bool overwrite);
+void Copy(
+    const std::string &src,
+    const std::string &dst,
+    bool              overwrite = false);
 
 
 //----------------------------------------------------------------------------//
@@ -241,7 +244,7 @@ tm_t GetLastWriteTimeUtc(const std::string &filename);
 void Move(
     const std::string &src,
     const std::string &dst,
-    bool overwrite = true);
+    bool               overwrite = false);
 
 
 //----------------------------------------------------------------------------//
@@ -252,11 +255,11 @@ void Move(
 ///   Opens a std::fstream on the specified path with read/write access.
 /// @param filename
 ///   The name of file that will be opened.
-/// @param fileMode
+/// @param filemode
 ///   The desired file mode to open the file.
 /// @returns A std::fstream object.
 /// @see FileMode
-std::fstream Open(const std::string &filename, const std::string &fileMode);
+std::fstream Open(const std::string &filename, const std::string &filemode);
 //COWTODO(n2omatt): Add an Open override with std::ios_base::openmode filemodes.
 
 

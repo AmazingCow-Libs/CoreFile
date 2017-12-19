@@ -24,4 +24,5 @@
 // Export Headers                                                             //
 //----------------------------------------------------------------------------//
 #include "include/CoreFile.h"
+#include "include/Config.h"
 #include "include/CoreFile_Utils.h"

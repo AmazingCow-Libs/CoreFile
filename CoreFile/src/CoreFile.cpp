@@ -27,6 +27,8 @@
 #include <ctime>
 #include <iterator>
 #include <sstream>
+// CoreFile
+#include "../include/Config.h"
 // CoreFS
 #include "CoreFS/CoreFS.h"
 // CoreAssert
@@ -88,7 +90,12 @@ std::fstream::openmode filemode_to_openmode(const std::string &filemode)
 
     //--------------------------------------------------------------------------
     // Invalid filemode.
-    COREASSERT_VERIFY("Invalid filemode (%s)", filemode);
+    COREASSERT_THROW_IF_NOT(
+        false,
+        std::invalid_argument,
+        "Invalid filemode: (%s)",
+        filemode.c_str()
+    );
 }
 
 
@@ -100,10 +107,11 @@ void CoreFile::AppendAllLines(
     const std::string              &filename,
     const std::vector<std::string> &lines)
 {
-    //COWTODO(n2omatt): How handle errors?
     std::stringstream ss;
     std::string new_line = CoreFS::NewLine();
 
+    //--------------------------------------------------------------------------
+    // Join the lines into a single string.
     std::copy(
         lines.begin(),
         lines.end(),
@@ -118,7 +126,6 @@ void CoreFile::AppendAllText(
     const std::string &filename,
     const std::string &contents)
 {
-    //COWTODO(n2omatt): Should we check errors or let the std crash itself???
     auto file_stream = CoreFile::Open(filename, FileMode::Text::kAppend);
     file_stream << contents;
 }
@@ -131,15 +138,34 @@ void CoreFile::AppendAllText(
 void CoreFile::Copy(
     const std::string &src,
     const std::string &dst,
-    bool               overwrite)
+    bool               overwrite /* = false */)
 {
-    //COWTODO(n2omatt): How should we handle errors?
-    //  Error codes, exceptions, return false, ignore????
-    if(!CoreFS::Exists(src))
-        return;
+    COREFILE_CHECK(
+        CoreFS::Exists(src),   // What is to check...
+        { return; },           // If check doesn't pass execute this block,
+        std::invalid_argument, // OR throw this exception...
+        "Source file doesn't exists - src: (%s)",
+        src.c_str()
+    );
 
-    if(CoreFS::Exists(dst) && !overwrite)
-        return;
+    auto a = CoreFS::Exists(dst);
+    if (!(CoreFS::Exists(dst) && !overwrite)) {
+        (((CoreFS::Exists(dst) && !overwrite)))
+        ? (void)0
+        : CoreAssert::Private::_core_assert_print_args(
+            "(CoreFS::Exists(dst) && !overwrite)", "_file_name_", 157,
+            "_function_name_",
+            ("Destination file exists and overwrite is false - dst: (%s)"),
+            dst.c_str());
+    }
+
+    COREFILE_CHECK(
+        (CoreFS::Exists(dst) && !overwrite),  // What is to check...
+        { return; },                          // If check doesn't pass execute this block,
+        std::runtime_error,                   // OR throw this exception...
+        "Destination file exists and overwrite is false - dst: (%s)",
+        dst.c_str()
+    );
 
     CoreFile::WriteAllBytes(
         dst,
@@ -170,8 +196,13 @@ std::fstream CoreFile::CreateText(const std::string &filename)
 //------------------------------------------------------------------------------
 void CoreFile::Delete(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors....
-    remove(filename.c_str());
+    COREFILE_CHECK(
+        (remove(filename.c_str()) == 0), // What is to check...
+        { return; },                     // If check doesn't pass execute this block,
+        std::runtime_error,              // OR throw this exception...
+        "Failed to Delete file - filename (%s)",
+        filename.c_str()
+    );
 }
 
 
@@ -233,10 +264,20 @@ CoreFile::tm_t CoreFile::GetLastWriteTimeUtc(const std::string &filename)
 // Move                                                                       //
 //----------------------------------------------------------------------------//
 //------------------------------------------------------------------------------
-void CoreFile::Move(const std::string &src, const std::string &dst)
+void CoreFile::Move(
+    const std::string &src,
+    const std::string &dst,
+    bool               overwrite /* = false */)
 {
-    //COWTODO(n2omatt): How we gonna handle errors?
-    rename(src.c_str(), dst.c_str());
+    COREFILE_CHECK(
+        (rename(src.c_str(), dst.c_str()) == 0), // What is to check...
+        { return; },                             // If check doesn't pass execute this block,
+        std::runtime_error,                      // OR throw this exception...
+        "Failed to Move file - src (%s) dst (%s)",
+        src.c_str(),
+        dst.c_str()
+    );
+
 }
 
 
@@ -246,12 +287,19 @@ void CoreFile::Move(const std::string &src, const std::string &dst)
 //------------------------------------------------------------------------------
 std::fstream CoreFile::Open(
     const std::string &filename,
-    const std::string &fileMode)
+    const std::string &filemode)
 {
-    //COWTODO(n2omatt): How we gonna handle errors???
     std::fstream stream;
-    auto openmode = filemode_to_openmode(fileMode);
+    auto openmode = filemode_to_openmode(filemode);
     stream.open(filename.c_str(), openmode);
+
+    COREASSERT_THROW_IF_NOT(
+        stream.is_open(),
+        std::ios::failure,
+        "Failed to open stream - filename: (%s) - filemode (%s)",
+        filename.c_str(),
+        filemode.c_str()
+    );
 
     return stream;
 }
@@ -259,21 +307,18 @@ std::fstream CoreFile::Open(
 //------------------------------------------------------------------------------
 std::fstream CoreFile::OpenRead(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors???
     return Open(filename, FileMode::Binary::kRead);
 }
 
 //------------------------------------------------------------------------------
 std::fstream CoreFile::OpenText(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors???
     return Open(filename, FileMode::Text::kRead);
 }
 
 //------------------------------------------------------------------------------
 std::fstream CoreFile::OpenWrite(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors???
     return Open(filename, FileMode::Binary::kWrite);
 }
 
@@ -290,11 +335,11 @@ std::vector<CoreFile::byte_t> CoreFile::ReadAllBytes(const std::string &filename
     if(!CoreFile::Exist(filename))
         return ret_val;
 
-    //Open the file and calculate it's size.
+    // Open the file and calculate it's size.
     auto file_stream = CoreFile::OpenRead(filename);
     auto size        = CoreFile::GetSize(file_stream);
 
-    //Play nice with memory.
+    // Play nice with memory.
     ret_val.resize(size);
     file_stream.read((char *)(&ret_val[0]), size);
 
@@ -304,7 +349,7 @@ std::vector<CoreFile::byte_t> CoreFile::ReadAllBytes(const std::string &filename
 //------------------------------------------------------------------------------
 std::vector<std::string> CoreFile::ReadAllLines(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors??
+    // COWTODO(n2omatt): How we gonna handle errors??
     std::vector<std::string> ret_val;
 
     if(!CoreFile::Exist(filename))
@@ -325,7 +370,7 @@ std::vector<std::string> CoreFile::ReadAllLines(const std::string &filename)
 //------------------------------------------------------------------------------
 std::string CoreFile::ReadAllText(const std::string &filename)
 {
-    //COWTODO(n2omatt): How we gonna handle errors??
+    // COWTODO(n2omatt): How we gonna handle errors??
     std::string ret_val;
 
     if(!CoreFile::Exist(filename))
