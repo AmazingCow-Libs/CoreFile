@@ -34,6 +34,9 @@
 // CoreAssert
 #include "CoreAssert/CoreAssert.h"
 
+// COWTODO(n2omatt); Implement...
+#define COREFILE_CHECK(_cond_, _code_, _exception_, _msg_, ...) \
+    do {} while(0);
 
 //----------------------------------------------------------------------------//
 // Helper Functions                                                           //
