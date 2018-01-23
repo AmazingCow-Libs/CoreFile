@@ -1,3 +1,0 @@
-[submodule "lib/CoreFS"]
-	path = lib/CoreFS
-	url = http://github.com/amazingcow-libs/CoreFS
