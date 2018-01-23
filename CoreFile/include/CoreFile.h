@@ -24,6 +24,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <time.h>
 // CoreFile
 #include "CoreFile_Utils.h"
 
@@ -39,7 +40,8 @@ using byte_t = unsigned char;
 
 ///-----------------------------------------------------------------------------
 /// @brief Just to reduce verbosity and let clear what this type means.
-using tm_t = struct tm;
+typedef struct tm tm_t;
+
 
 ///-----------------------------------------------------------------------------
 /// @brief The mode that file will be opened.
