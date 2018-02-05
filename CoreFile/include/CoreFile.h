@@ -22,6 +22,7 @@
 
 // std
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <time.h>
@@ -130,7 +131,7 @@ void Copy(
 /// @note
 ///   This function will create the file in binary mode.
 /// @return A std::fstream object.
-std::fstream Create(const std::string &filename);
+std::unique_ptr<std::fstream> Create(const std::string &filename);
 
 ///-----------------------------------------------------------------------------
 /// @brief
@@ -140,7 +141,7 @@ std::fstream Create(const std::string &filename);
 /// @note
 ///   This function will create the file in text mode.
 /// @return A std::fstream object.
-std::fstream CreateText(const std::string &filename);
+std::unique_ptr<std::fstream> CreateText(const std::string &filename);
 
 
 //----------------------------------------------------------------------------//
@@ -261,7 +262,10 @@ void Move(
 ///   The desired file mode to open the file.
 /// @returns A std::fstream object.
 /// @see FileMode
-std::fstream Open(const std::string &filename, const std::string &filemode);
+std::unique_ptr<std::fstream> Open(
+    const std::string &filename,
+    const std::string &filemode);
+
 //COWTODO(n2omatt): Add an Open override with std::ios_base::openmode filemodes.
 
 
@@ -273,7 +277,7 @@ std::fstream Open(const std::string &filename, const std::string &filemode);
 /// @note
 ///   The file will be open binary mode (FileMode::Binary::kRead).
 /// @returns A std::fstream object.
-std::fstream OpenRead(const std::string &filename);
+std::unique_ptr<std::fstream> OpenRead(const std::string &filename);
 
 ///-----------------------------------------------------------------------------
 /// @brief
@@ -283,7 +287,7 @@ std::fstream OpenRead(const std::string &filename);
 /// @note
 ///   The file will be open text mode (FileMode::Text::kRead).
 /// @returns A std::fstream object.
-std::fstream OpenText(const std::string &filename);
+std::unique_ptr<std::fstream> OpenText(const std::string &filename);
 
 ///-----------------------------------------------------------------------------
 /// @brief
@@ -293,7 +297,7 @@ std::fstream OpenText(const std::string &filename);
 /// @note
 ///   The file will be open binary mode (FileMode::Binary::kRead).
 /// @returns A std::fstream object.
-std::fstream OpenWrite(const std::string &filename);
+std::unique_ptr<std::fstream> OpenWrite(const std::string &filename);
 
 
 //----------------------------------------------------------------------------//

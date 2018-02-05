@@ -129,8 +129,8 @@ void CoreFile::AppendAllText(
     const std::string &filename,
     const std::string &contents)
 {
-    auto file_stream = CoreFile::Open(filename, FileMode::Text::kAppend);
-    file_stream << contents;
+    auto p_file_stream = CoreFile::Open(filename, FileMode::Text::kAppend);
+    (*p_file_stream) << contents;
 }
 
 
@@ -181,13 +181,13 @@ void CoreFile::Copy(
 // Create                                                                     //
 //----------------------------------------------------------------------------//
 //------------------------------------------------------------------------------
-std::fstream CoreFile::Create(const std::string &filename)
+std::unique_ptr<std::fstream> CoreFile::Create(const std::string &filename)
 {
     return CoreFile::Open(filename, FileMode::Binary::kReadWrite_Truncate);
 }
 
 //------------------------------------------------------------------------------
-std::fstream CoreFile::CreateText(const std::string &filename)
+std::unique_ptr<std::fstream> CoreFile::CreateText(const std::string &filename)
 {
     return CoreFile::Open(filename, FileMode::Text::kReadWrite_Truncate);
 }
@@ -288,39 +288,41 @@ void CoreFile::Move(
 // Open                                                                       //
 //----------------------------------------------------------------------------//
 //------------------------------------------------------------------------------
-std::fstream CoreFile::Open(
+std::unique_ptr<std::fstream> CoreFile::Open(
     const std::string &filename,
     const std::string &filemode)
 {
-    std::fstream stream;
     auto openmode = filemode_to_openmode(filemode);
-    stream.open(filename.c_str(), openmode);
+
+    auto p_stream = std::unique_ptr<std::fstream>(new std::fstream());
+    //COWTODO(n2omatt): Check if could alloc the p_stream.
+    p_stream->open(filename.c_str(), openmode);
 
     COREASSERT_THROW_IF_NOT(
-        stream.is_open(),
+        p_stream->is_open(),
         std::ios::failure,
         "Failed to open stream - filename: (%s) - filemode (%s)",
         filename.c_str(),
         filemode.c_str()
     );
 
-    return stream;
+    return p_stream;
 }
 
 //------------------------------------------------------------------------------
-std::fstream CoreFile::OpenRead(const std::string &filename)
+std::unique_ptr<std::fstream> CoreFile::OpenRead(const std::string &filename)
 {
     return Open(filename, FileMode::Binary::kRead);
 }
 
 //------------------------------------------------------------------------------
-std::fstream CoreFile::OpenText(const std::string &filename)
+std::unique_ptr<std::fstream> CoreFile::OpenText(const std::string &filename)
 {
     return Open(filename, FileMode::Text::kRead);
 }
 
 //------------------------------------------------------------------------------
-std::fstream CoreFile::OpenWrite(const std::string &filename)
+std::unique_ptr<std::fstream>  CoreFile::OpenWrite(const std::string &filename)
 {
     return Open(filename, FileMode::Binary::kWrite);
 }
@@ -339,12 +341,12 @@ std::vector<CoreFile::byte_t> CoreFile::ReadAllBytes(const std::string &filename
         return ret_val;
 
     // Open the file and calculate it's size.
-    auto file_stream = CoreFile::OpenRead(filename);
-    auto size        = CoreFile::GetSize(file_stream);
+    auto p_file_stream = CoreFile::OpenRead(filename);
+    auto size          = CoreFile::GetSize(*p_file_stream);
 
     // Play nice with memory.
     ret_val.resize(size);
-    file_stream.read((char *)(&ret_val[0]), size);
+    p_file_stream->read((char *)(&ret_val[0]), size);
 
     return ret_val;
 }
@@ -359,11 +361,11 @@ std::vector<std::string> CoreFile::ReadAllLines(const std::string &filename)
         return ret_val;
 
     //Open the file and calculate it's size.
-    auto file_stream = CoreFile::OpenText(filename);
-    while(!file_stream.eof())
+    auto p_file_stream = CoreFile::OpenText(filename);
+    while(!p_file_stream->eof())
     {
         std::string line;
-        std::getline(file_stream, line);
+        std::getline(*p_file_stream, line);
         ret_val.push_back(line);
     }
 
@@ -443,8 +445,8 @@ size_t CoreFile::GetSize(const std::string &filename)
     if(!CoreFile::Exist(filename))
         return 0;
 
-    auto stream = OpenRead(filename);
-    return GetSize(stream);
+    auto p_stream = OpenRead(filename);
+    return GetSize(*p_stream);
 }
 
 //------------------------------------------------------------------------------
@@ -474,14 +476,14 @@ void CoreFile::WriteAllBytes(
     const std::vector<byte_t> &bytes)
 {
     //COWTODO(n2omatt): How we gonna handle errors??
-    auto file_stream = CoreFile::Open(
+    auto p_file_stream = CoreFile::Open(
         filename,
         FileMode::Binary::kReadWrite_Truncate
     );
     std::copy(
         bytes.begin(),
         bytes.end  (),
-        std::ostream_iterator<CoreFile::byte_t>(file_stream)
+        std::ostream_iterator<CoreFile::byte_t>(*p_file_stream)
     );
 }
 
@@ -491,7 +493,7 @@ void CoreFile::WriteAllLines(
     const std::vector<std::string> &lines)
 {
     //COWTODO(n2omatt): How we gonna handle errors??
-    auto file_stream = CoreFile::Open(
+    auto p_file_stream = CoreFile::Open(
         filename,
         FileMode::Text::kReadWrite_Truncate
     );
@@ -499,7 +501,10 @@ void CoreFile::WriteAllLines(
     std::copy(
         lines.begin(),
         lines.end  (),
-        std::ostream_iterator<std::string>(file_stream, CoreFS::NewLine().c_str())
+        std::ostream_iterator<std::string>(
+            *p_file_stream,
+            CoreFS::NewLine().c_str()
+        )
     );
 }
 
@@ -509,7 +514,7 @@ void CoreFile::WriteAllText(
     const std::string &contents)
 {
     //COWTODO(n2omatt): How we gonna handle errors??
-    auto file_stream = CoreFile::Open(
+    auto p_file_stream = CoreFile::Open(
         filename,
         FileMode::Text::kReadWrite_Truncate
     );
@@ -517,6 +522,6 @@ void CoreFile::WriteAllText(
     std::copy(
         contents.begin(),
         contents.end  (),
-        std::ostream_iterator<char>(file_stream)
+        std::ostream_iterator<char>(*p_file_stream)
     );
 }
