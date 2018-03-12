@@ -151,17 +151,6 @@ void CoreFile::Copy(
         src.c_str()
     );
 
-    auto a = CoreFS::Exists(dst);
-    if (!(CoreFS::Exists(dst) && !overwrite)) {
-        (((CoreFS::Exists(dst) && !overwrite)))
-        ? (void)0
-        : CoreAssert::Private::_core_assert_print_args(
-            "(CoreFS::Exists(dst) && !overwrite)", "_file_name_", 157,
-            "_function_name_",
-            ("Destination file exists and overwrite is false - dst: (%s)"),
-            dst.c_str());
-    }
-
     COREFILE_CHECK(
         (CoreFS::Exists(dst) && !overwrite),  // What is to check...
         { return; },                          // If check doesn't pass execute this block,
